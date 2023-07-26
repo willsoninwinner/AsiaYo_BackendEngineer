@@ -25,12 +25,19 @@ func ConvertCurrency(c *gin.Context) {
 
 	params.Amount = strings.TrimPrefix(params.Amount, "$")
 	params.Amount = strings.ReplaceAll(params.Amount, ",", "")
-	convertedAmount, _ := strconv.ParseFloat(params.Amount, 64)
+	convertedAmount, err := strconv.ParseFloat(params.Amount, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
 	amount, err := service.Convert(params.Source, params.Target, convertedAmount)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
 		})
+		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
